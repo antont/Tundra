@@ -1,6 +1,8 @@
 // !ref: local://crosshair.js
 // !ref: local://default_avatar.xml
 
+debug.Log("================== SIMPLE AVATAR ======================");
+
 // A simple walking avatar with physics & third person camera
 engine.IncludeFile("local://crosshair.js");
 var rotate_speed = 150.0;
@@ -17,8 +19,8 @@ var avatar_mass = 10;
 var motion_x = 0;
 var motion_y = 0;
 var motion_z = 0;
-var rotate = 0;
-var rotamount = 0;
+var rotate = 0; //now on client side
+var rotamount = 0; //this too
 
 // Needed bools for logic
 var isserver = server.IsRunning();
@@ -70,6 +72,7 @@ function ServerInitialize() {
 
     // Hook to physics update
     rigidbody.GetPhysicsWorld().Updated.connect(ServerUpdatePhysics);
+    me.placeable.AttributeChanged.connect(ServerPlaceableChanged);
 
     // Hook to tick update for continuous rotation update
     frame.Updated.connect(ServerUpdate);
@@ -88,6 +91,17 @@ function ServerInitialize() {
     me.Action("Teleport").Triggered.connect(ServerHandleTeleport);
 
     rigidbody.PhysicsCollision.connect(ServerHandleCollision);
+}
+
+function ServerPlaceableChanged(comp, attr, changetype) {
+    debug.Log("ServerPlaceableChanged: " + me.placeable.transform.rot.z);
+    me.placeable.AttributeChanged.disconnect(ServerPlaceableChanged);
+    //me.rigidbody.SetRotation(me.placeable.transform.rot);
+    me.placeable.AttributeChanged.connect(ServerPlaceableChanged);
+    debug.Log("After rigidbody rotate: " + me.placeable.transform.rot.z);
+    //debug.Log(comp);
+    //debug.Log(comp);
+    //debug.Log(comp);
 }
 
 function ServerUpdate(frametime) {
@@ -130,7 +144,7 @@ function ServerHandleCollision(ent, pos, normal, distance, impulse, newCollision
 }
 
 function ServerUpdatePhysics(frametime) {
-     var placeable = me.placeable;
+    var placeable = me.placeable;
     var rigidbody = me.rigidbody;
 
     if (!flying) {
@@ -288,14 +302,14 @@ function ServerHandleToggleFly() {
     ServerSetAnimationState();
 }
 
-function ServerHandleRotate(param) {
+/*function ServerHandleRotate(param) {
     if (param == "left") {
         rotate = -1;
     }
     if (param == "right") {
         rotate = 1;
     }
-}
+}*/
 
 function ServerHandleStopRotate(param) {
     if ((param == "left") && (rotate == -1)) {
@@ -371,6 +385,13 @@ function ClientInitialize() {
         me.Action("MouseLookX").Triggered.connect(ClientHandleTripodLookX);
         me.Action("MouseLookY").Triggered.connect(ClientHandleTripodLookY);
         me.Action("CheckState").Triggered.connect(ClientCheckState);
+        
+        var inputcontext = me.inputmapper.GetInputContext();
+        debug.Log("INPUTCONTEXT: " + typeof(inputcontext));
+        inputcontext.KeyEventReceived.connect(ClientHandleKeypress);
+        //inputcontext.RegisterKeyEvent("Left").connect(ClientHandleKeypress);
+        //leftpress = inputcontext.RegisterKeyEvent(QKeySequence.fromString("Left"));
+        //leftpress.SequencePressed.connect(ClientHandleKeypress);
         
         // Inspect the login avatar url property
         var avatarurl = client.GetLoginProperty("avatarurl");
@@ -481,14 +502,21 @@ function ClientUpdate(frametime)
     }*/
     
     if (rotamount != 0) { //mouse rotating
+        me.rigidbody.mass = 0;
+        
+        var t = me.placeable.transform;
+        var oldrotz = t.rot.z;
+                
         var rotateVec = new Vector3df();
         rotateVec.z = -mouse_rotate_sensitivity * rotamount;
-        //me.rigidbody.Rotate(rotateVec);
-        t = me.placeable.transform;
+        me.rigidbody.Rotate(rotateVec);
         t.rot.z += rotateVec.z;
+
         me.placeable.transform = t;
+        debug.Log("oldrotz, change, new: " + oldrotz + ", " + rotamount + ", " + me.placeable.transform.rot.z);
         rotamount = 0;
-        //debug.Log("oldrot, change, new: " + oldz + ", " + 1 + ", " + me.placeable.transform.rot.z);
+        
+        rigidbody.mass = avatar_mass;
     }
 
     // Tie enabled state of inputmapper to the enabled state of avatar camera
@@ -550,10 +578,11 @@ function ClientCreateInputMapper() {
     var inputContext = inputmapper.GetInputContext();
     inputContext.GestureStarted.connect(GestureStarted);
     inputContext.GestureUpdated.connect(GestureUpdated);
+    
     inputContext.MouseMove.connect(ClientHandleMouseMove);
-
+    
     // Local camera mapper for mouse scroll
-    var inputmapper = me.GetOrCreateComponentRaw("EC_InputMapper", "CameraMapper", 2, false);
+    /*var inputmapper = me.GetOrCreateComponentRaw("EC_InputMapper", "CameraMapper", 2, false);
     inputmapper.SetNetworkSyncEnabled(false);
     inputmapper.contextPriority = 100;
     inputmapper.takeMouseEventsOverQt = true;
@@ -561,7 +590,7 @@ function ClientCreateInputMapper() {
     inputmapper.executionType = 1; // Execute actions locally
     inputmapper.RegisterMapping("T", "ToggleTripod", 1);
     inputmapper.RegisterMapping("+", "Zoom(in)", 1);
-    inputmapper.RegisterMapping("-", "Zoom(out)", 1);
+    inputmapper.RegisterMapping("-", "Zoom(out)", 1);*/
 }
 
 function ClientCreateAvatarCamera() {
@@ -728,14 +757,14 @@ function ClientCheckState()
     // If ent got destroyed or something fatal, return cursor
     if (cameraentity == null || avatar_placeable == null)
     {
-        if (crosshair.isActive())
+        if (crosshair && crosshair.isActive())
             crosshair.hide();
         return;
     }
         
     if (!first_person)
     {
-        if (crosshair.isActive())
+        if (crosshair && crosshair.isActive())
             crosshair.hide();
         
         /* 
@@ -758,7 +787,7 @@ function ClientCheckState()
         // hide curson and show av
         if (!cameraentity.ogrecamera.IsActive())
         {
-            if (crosshair.isActive())
+            if (crosshair &&  crosshair.isActive())
                 crosshair.hide();
                 
             /* 
@@ -778,7 +807,7 @@ function ClientCheckState()
         {
             // 1st person mode and camera is active
             // show curson and av
-            if (!crosshair.isActive())
+            if (crosshair &&  !crosshair.isActive())
                 crosshair.show();
             
             /* 
@@ -798,11 +827,10 @@ function ClientCheckState()
 }
 
 function ClientHandleMouseMove(mouseevent)
-{    
+{  
+    debug.Log("ClientHandleMouseMove1");    
     ClientCheckState();
 
-    debug.Log("ClientHandleMouseMove1");
-    
     if (mouseevent.IsItemUnderMouse())
     {
         // If there is a graphics widget here disable first person mode
@@ -841,40 +869,64 @@ function ClientHandleMouseMove(mouseevent)
         if (!crosshair.isUsingLabel)
             QApplication.setOverrideCursor(crosshair.cursor);
     }
-    
-    debug.Log("ClientHandleMouseMove4");
 */
 
-    var cameraentity = scene.GetEntityByNameRaw("AvatarCamera");
-    if (cameraentity == null)
-        return;
-        
-    // Dont move av rotation if we are not the active cam
-    if (!cameraentity.ogrecamera.IsActive())
-        return;
-
-    debug.Log("ClientHandleMouseMove5");
-
-    var cameraplaceable = cameraentity.placeable;
-    var cameratransform = cameraplaceable.transform;
-
+    debug.Log("ClientHandleMouseMove4");
+    
     if (mouseevent.relativeX != 0) {
         //me.Exec(2, "MouseLookX", String(mouse_rotate_sensitivity*2 * parseInt(mouseevent.relativeX)));
         rotamount = mouse_rotate_sensitivity*2 * parseInt(mouseevent.relativeX);
         debug.Log("rotamount set to: " + rotamount); 
     }
-    if (mouseevent.relativeY != 0)
-        cameratransform.rot.x -= (mouse_rotate_sensitivity/3) * parseInt(mouseevent.relativeY);
+
+    var cameraentity = scene.GetEntityByNameRaw("AvatarCamera");
+    if (cameraentity == null)
+        return;
+    
+    // Dont move av rotation if we are not the active cam
+    if (!cameraentity.ogrecamera.IsActive())
+        return;
+
+        
+    debug.Log("ClientHandleMouseMove5");
+
+    var cameraplaceable = cameraentity.placeable;
+    var cameratransform = cameraplaceable.transform;
         
     // Dont let the 1st person flip vertically, 180 deg view angle
     if (cameratransform.rot.x < 0)
         cameratransform.rot.x = 0;
     if (cameratransform.rot.x > 180)
         cameratransform.rot.x = 180;
+    
+    if (mouseevent.relativeY != 0)
+        cameratransform.rot.x -= (mouse_rotate_sensitivity/3) * parseInt(mouseevent.relativeY);
+
 
     cameraplaceable.transform = cameratransform;
 }
 
+function ClientHandleKeypress(keyevent) {
+    debug.Log("KeyEvent: " + typeof(keyevent));
+    debug.Log(keyevent.keyCodeInt());
+    
+    if (keyevent.sequence.toString() == "Left") {
+        debug.Log("left!");
+        rotamount = -10;
+    }
+    
+    debug.Log(Qt.Key.Left);
+    debug.Log(" --/ ");
+}
+
+function ClientHandleRotate(param) {
+    if (param == "left") {
+        rotate = -1;
+    }
+    if (param == "right") {
+        rotate = 1;
+    }
+}
 function CommonFindAnimations() {
     var animcontrol = me.animationcontroller;
     var availableAnimations = animcontrol.GetAvailableAnimations();
