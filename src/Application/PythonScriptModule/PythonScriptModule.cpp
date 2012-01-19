@@ -558,6 +558,22 @@ namespace PythonScript
 
         return 0;
     }
+ 
+    Entity *PythonScriptModule::GetEntityByName(QString name)
+    {
+      Scene *scene = GetFramework()->Scene()->MainCameraScene();
+      if (scene)
+      {
+          return scene->GetEntityByName(name).get();
+      }
+      else
+      {
+        LogError("PythonScriptModule::GetEntityByName(): Failed to find entity, Scene()->GetDefaultScene() was null.");
+
+      }
+      return 0;
+    }
+  
 
     InputContext* PythonScriptModule::CreateInputContext(const QString &name, int priority)
     {

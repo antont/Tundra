@@ -60,6 +60,9 @@ namespace PythonScript
         /// Get active camera Entity.
         Entity* GetActiveCamera() const;
 
+        /// Get entity by name
+        Entity* GetEntityByName(QString name);
+
         /// Create a new InputContext* with name and priority.
         InputContext* CreateInputContext(const QString &name, int priority = 100);
 
