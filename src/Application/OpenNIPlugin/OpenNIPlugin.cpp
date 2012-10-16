@@ -49,7 +49,7 @@ int init() {
   XnCallbackHandle hUserCBs, hCalibrationStartCB, hCalibrationCompleteCB, hPoseCBs;
   /*g_UserGenerator.RegisterUserCallbacks(NewUser, LostUser, NULL, hUserCBs);
   rc = g_UserGenerator.GetSkeletonCap().RegisterToCalibrationStart(CalibrationStarted, NULL, hCalibrationStartCB);
-  CHECK_RC(rc, "Register to calbiration start");
+  CHECK_RC(rc, "Register to calibration start");
   rc = g_UserGenerator.GetSkeletonCap().RegisterToCalibrationComplete(CalibrationCompleted, NULL, hCalibrationCompleteCB);
   CHECK_RC(rc, "Register to calibration complete");
   rc = g_UserGenerator.GetPoseDetectionCap().RegisterToPoseDetected(PoseDetected, NULL, hPoseCBs);
