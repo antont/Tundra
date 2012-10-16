@@ -1,5 +1,5 @@
 # Define target name and output directory
-#init_target (OpenNIPlugin OUTPUT plugins)
+init_target (OpenNIPlugin OUTPUT plugins)
 
 # openNI lib
 FIND_LIBRARY(OPEN_NI_LIBRARY NAMES OpenNI PATHS ${OPEN_NI_LIB})
@@ -34,8 +34,8 @@ SET(LIBS ${LIBS} ${OPEN_NI_LIBRARY})
 # ENDIF()
 
 # #INCLUDE_DIRECTORIES($ENV{OPEN_NI_INCLUDE})
-# FIND_LIBRARY(OPEN_NI_LIBRARY NAMES OpenNI PATHS $ENV{OPEN_NI_LIB})
-# SET(LIBS ${LIBS} ${OPEN_NI_LIBRARY})
+FIND_LIBRARY(OPEN_NI_LIBRARY NAMES OpenNI PATHS $ENV{OPEN_NI_LIB})
+SET(LIBS ${LIBS} ${OPEN_NI_LIBRARY})
 
 # -----------------------------------------------------------------------------
 # NITE
@@ -71,6 +71,7 @@ use_core_modules(Framework)
 build_library (${TARGET_NAME} SHARED ${SOURCE_FILES} ${MOC_SRCS} ${UI_SRCS})
 
 link_modules (Framework)
+target_link_libraries(${TARGET_NAME} ${LIBS}) 
 
 SetupCompileFlags()
 
