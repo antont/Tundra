@@ -4,8 +4,8 @@
 #include "Framework.h"
 #include "CoreDefines.h"
 
-#include <XnOpenNI.h>
-#include <XnCodecIDs.h>
+//#include <XnOpenNI.h>
+//#include <XnCodecIDs.h>
 #include <XnCppWrapper.h>
 
 #define SAMPLE_XML_PATH "data/openni/Sample-User.xml"
@@ -44,7 +44,7 @@ int init() {
   xn::ScriptNode g_ScriptNode;
   xn::DepthGenerator g_DepthGenerator;
   xn::UserGenerator g_UserGenerator;
-  xn::Recorder* g_pRecorder;
+  //xn::Recorder* g_pRecorder;
   
   XnCallbackHandle hUserCBs, hCalibrationStartCB, hCalibrationCompleteCB, hPoseCBs;
   /*g_UserGenerator.RegisterUserCallbacks(NewUser, LostUser, NULL, hUserCBs);
