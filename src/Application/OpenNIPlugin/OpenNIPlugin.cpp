@@ -174,6 +174,27 @@ float2 OpenNIPlugin::GetUserPos()
     return pos;
 }
 
+QVariantList OpenNIPlugin::test()
+{
+    QVariantList ret;
+
+    XnUserID aUsers[15];
+    XnUInt16 nUsers = 15;
+    userGenerator_.GetUsers(aUsers, nUsers);
+
+    XnPoint3D com;
+    float2 pos;
+    for (int i = 0; i < nUsers; ++i)
+    {
+        userGenerator_.GetCoM(aUsers[i], com);
+        pos.x = com.X;
+        pos.y = com.Y;
+        ret.push_back(QVariant(pos));
+    }
+    
+    return ret;
+}
+
 extern "C"
 {
     DLLEXPORT void TundraPluginMain(Framework *fw)

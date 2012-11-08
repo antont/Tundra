@@ -8,6 +8,7 @@ frame.Updated.connect(
         var userpos = openni.GetUserPos();
         var obpos = obplc.Position();
         //print(userpos.x + " - " + userpos.y + " : " + ob + " " + obpos);
+        print(openni.test());
         obplc.SetPosition(userpos.x / 3, 0, userpos.y);
     }
 );
