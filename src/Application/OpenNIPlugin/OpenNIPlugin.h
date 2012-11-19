@@ -7,6 +7,7 @@
 
 #include <QObject>
 #include <QVariant>
+//#include <QScriptValue>
 #include "Math/float2.h"
 
 class OPENNI_PLUGIN_API OpenNIPlugin : public IModule
@@ -36,6 +37,7 @@ public:
 public slots:
     float2 GetUserPos();
     QVariantList test();
+    //QScriptValue test2();
 
 private:
     xn::Context context_;

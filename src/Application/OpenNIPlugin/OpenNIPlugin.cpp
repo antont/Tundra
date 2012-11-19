@@ -7,6 +7,7 @@
 //#include <XnOpenNI.h>
 //#include <XnCodecIDs.h>
 #include <XnCppWrapper.h>
+//#include <QScriptValue>
 
 #define SAMPLE_XML_PATH "data/openni/Sample-User.xml"
 
@@ -174,6 +175,7 @@ float2 OpenNIPlugin::GetUserPos()
     return pos;
 }
 
+//urgh - float2()s are not decorated right on the js side via qvariantlist? print ok..
 QVariantList OpenNIPlugin::test()
 {
     QVariantList ret;
@@ -183,17 +185,42 @@ QVariantList OpenNIPlugin::test()
     userGenerator_.GetUsers(aUsers, nUsers);
 
     XnPoint3D com;
+    //float2 pos;
+    for (int i = 0; i < nUsers; ++i)
+    {
+        userGenerator_.GetCoM(aUsers[i], com);
+        //pos.x = com.X;
+        //pos.y = com.Y;
+        //ret.push_back(QVariant(pos));
+        ret.push_back(com.X);
+        ret.push_back(com.Y);
+    }
+    
+    return ret;
+}
+
+/*QScriptValue OpenNIPlugin::test()
+{
+    QScriptValue ret;
+
+    XnUserID aUsers[15];
+    XnUInt16 nUsers = 15;
+    userGenerator_.GetUsers(aUsers, nUsers);
+
+    ret = engine->newArray(ret.size());
+    XnPoint3D com;
     float2 pos;
     for (int i = 0; i < nUsers; ++i)
     {
         userGenerator_.GetCoM(aUsers[i], com);
         pos.x = com.X;
         pos.y = com.Y;
-        ret.push_back(QVariant(pos));
+        ret.setProperty(i, QVariant(pos));
     }
     
     return ret;
 }
+*/
 
 extern "C"
 {
