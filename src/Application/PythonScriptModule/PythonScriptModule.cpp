@@ -170,8 +170,9 @@ namespace PythonScript
 
         // Add PythonScriptModule as '_pythonscriptmodule' 
         // and Framework as '_tundra' to python.
-        mainModule.addObject("_pythonscriptmodule", this);
+        /*mainModule.addObject("_pythonscriptmodule", this);
         mainModule.addObject("_tundra", GetFramework());
+	*/
 
         QDir pythonPlugins(Application::InstallationDirectory() + "pyplugins");
         QDir pythonLibrary(pythonPlugins.absoluteFilePath("python/"));
@@ -294,10 +295,11 @@ namespace PythonScript
         if (!pythonQtStarted_)
         {
 	  //Py_NoSiteFlag = 1;
-	  //Py_InitializeEx(0);
+	  Py_InitializeEx(0);
 
-	  //PythonQt::init(); //PythonQt::IgnoreSiteModule | PythonQt::RedirectStdOut | PythonQt::PythonAlreadyInitialized);
+	  //PythonQt::init(PythonQt::IgnoreSiteModule | PythonQt::RedirectStdOut); // | PythonQt::PythonAlreadyInitialized);
 	  //PythonQt_QtAll::init();
+	  /*
             if (!Py_IsInitialized())
             {
                 LogError("PythonScriptModule::StartPythonQt(): Could not Py_Initialize python!");
@@ -408,7 +410,7 @@ namespace PythonScript
             PythonQt::self()->addDecorators(new TundraDecorator());
             PythonQt::self()->registerCPPClass("AssetReference");
             PythonQt::self()->registerCPPClass("ScenePtr");
-
+	  */
             pythonQtStarted_ = true;
         }
     }
