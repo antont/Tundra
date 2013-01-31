@@ -293,11 +293,11 @@ namespace PythonScript
     {
         if (!pythonQtStarted_)
         {
-            Py_NoSiteFlag = 1;
-            Py_InitializeEx(0);
+	  //Py_NoSiteFlag = 1;
+	  //Py_InitializeEx(0);
 
-            PythonQt::init(PythonQt::IgnoreSiteModule | PythonQt::RedirectStdOut | PythonQt::PythonAlreadyInitialized);
-            PythonQt_QtAll::init();
+	  //PythonQt::init(); //PythonQt::IgnoreSiteModule | PythonQt::RedirectStdOut | PythonQt::PythonAlreadyInitialized);
+	  //PythonQt_QtAll::init();
             if (!Py_IsInitialized())
             {
                 LogError("PythonScriptModule::StartPythonQt(): Could not Py_Initialize python!");
